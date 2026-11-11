@@ -11,6 +11,7 @@ import { loadWorkspace, saveWorkspace, loadAgentConversation, saveAgentConversat
 import { z } from "zod";
 import { getDemoAnswer, getDemoQuestions } from "./demoAnswers";
 import { localAgentReply } from "./localAgentPlaybook";
+import { inferHandoff } from "@shared/agentRouting";
 
 const hermesContextSchema = z.object({
   id: z.string().max(160),
@@ -371,6 +372,9 @@ export const appRouter = router({
       }),
   }),
   agents: router({
+    suggestedQuestions: publicProcedure
+      .input(z.object({ agent: z.enum(agentIds) }))
+      .query(({ input }) => getDemoQuestions(input.agent)),
     conversation: protectedProcedure
       .input(z.object({ agent: z.enum(agentIds) }))
       .query(async ({ input, ctx }) => {
@@ -432,20 +436,20 @@ export const appRouter = router({
         try {
           const result = await runModel(messages, 1100, input.provider ?? (input.agent === "hermes" || input.agent === "athena" ? "gemini" : "groq"), requestGatewayToken(ctx.req));
           const citedIds = input.agent === "hermes" ? extractCitedChunkIds(result.answer, combinedContext) : [];
-          return { answer: result.answer, provider: result.provider, citations: citedIds, handoffTo: null };
+          return { answer: result.answer, provider: result.provider, citations: citedIds, handoffTo: inferHandoff(input.agent, input.question) };
         } catch (error) {
           const detail = error instanceof Error ? error.message : "No hosted model provider is configured";
           console.warn(`${input.agent} hosted-model route unavailable; checking the verified demo playbook:`, detail);
           const preparedAnswer = getDemoAnswer(input.agent, input.question);
           if (preparedAnswer) {
-            return { answer: preparedAnswer, provider: "guidathon-demo-playbook", citations: [], handoffTo: null };
+            return { answer: preparedAnswer, provider: "guidathon-demo-playbook", citations: [], handoffTo: inferHandoff(input.agent, input.question) };
           }
           const roleFallback = localAgentReply(input.agent, input.question);
           return {
             answer: roleFallback.answer,
             provider: "guidathon-role-fallback",
             citations: [],
-            handoffTo: null,
+            handoffTo: inferHandoff(input.agent, input.question),
           };
         }
       }),
