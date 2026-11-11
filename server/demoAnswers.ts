@@ -75,7 +75,7 @@ const playbook: Record<DemoAgent, DemoEntry[]> = {
     {
       question: "How do we choose a strong hackathon idea?",
       aliases: ["Help us pick an idea", "What makes a hackathon idea strong"],
-      answer: "Choose the idea that solves a specific, painful problem for a reachable user and can be proven in the time available. Compare candidates on problem severity, differentiation, feasibility, demo clarity, and evidence. Write one sentence of evidence or uncertainty beside every score so numbers do not create false precision. Prefer a narrow workflow with a visible before-and-after over a broad platform with many unfinished features. Define the smallest valuable MVP and the assumption most likely to invalidate it.",
+      answer: "Choose the idea that solves a specific, painful problem for a reachable user and can be proven in the time available. Compare candidates across five dimensions: problem severity, differentiation, feasibility, demo clarity, and evidence. Write one sentence of evidence or uncertainty beside every score so numbers do not create false precision. Prefer a narrow workflow with a visible before-and-after over a broad platform with many unfinished features. Define the smallest valuable MVP and the assumption most likely to invalidate it.",
     },
     {
       question: "How can we validate our idea in 48 hours?",
